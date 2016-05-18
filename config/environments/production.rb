@@ -77,5 +77,5 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  Rails.application.routes.default_url_options[:host] = 'wifootbot.herokuapp.com'
+  Rails.application.routes.default_url_options[:host] = 'https://wifootbot.herokuapp.com/'
 end
