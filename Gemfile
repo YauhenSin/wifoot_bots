@@ -36,6 +36,8 @@ gem 'telegram-bot', github: 'telegram-bot-rb/telegram-bot', ref: 'a52e7ff'
 gem 'jazz_hands', github: 'dhanushram/jazz_hands', ref: '9bcd0a5d', platforms: [:ruby]
 gem 'pry', '~> 0.10.3'
 
+gem 'rails_12factor', group: :production
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
