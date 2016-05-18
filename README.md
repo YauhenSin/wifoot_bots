@@ -48,3 +48,4 @@ bin/rspec
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/telegram-bot-rb/telegram_bot_app.
+# wifoot_bots
