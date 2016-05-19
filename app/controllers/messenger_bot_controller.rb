@@ -1,9 +1,8 @@
 class MessengerBotController < ActionController::Base
   def message(event, sender)
     puts "_______"
-    puts event
-    puts sender.profile
-    puts sender
+    profile = sender.get_profile
+    puts profile
     puts event['message']['text']
 
     # profile = sender.get_profile
