@@ -1,1 +1,2 @@
-web: bundle exec puma -p 8443 -C config/puma.rb
+web: bundle exec puma -C config/puma.rb
+worker: bundle exec rake telegram:bot:poller BOT=wifoot_staging

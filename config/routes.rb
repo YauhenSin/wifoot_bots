@@ -1,8 +1,11 @@
 Rails.application.routes.draw do
   #telegram_webhooks TelegramWebhooksController
 
-  telegram_webhooks Telegram.bots[:wifoot] => TelegramWebhooksController
-  #telegram_webhooks Telegram.bots[:reiro] => TelegramWebhooksReiroController
+  #telegram_webhooks Telegram.bots[:wifoot] => TelegramWebhooksController
+  telegram_webhooks Telegram.bots[:wifoot_staging] => TelegramWebhooksController
+  telegram_webhooks Telegram.bots[:reiro] => TelegramWebhooksReiroController
+
+  mount Messenger::Bot::Space => "/webhook"
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
