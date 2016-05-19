@@ -1,2 +1,2 @@
 web: bundle exec puma -C config/puma.rb
-worker: bundle exec rake telegram:bot:poller BOT=wifoot
+worker: bundle exec rake telegram:bot:poller BOT=default
