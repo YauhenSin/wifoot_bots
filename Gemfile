@@ -26,6 +26,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'telegram-bot', github: 'telegram-bot-rb/telegram-bot', ref: 'a52e7ff'
 # gem 'telegram-bot', path: '../telegram-bot'
 
+gem 'puma'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
