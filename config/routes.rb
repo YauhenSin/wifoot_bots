@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   #telegram_webhooks Telegram.bots[:wifoot] => TelegramWebhooksController
   #telegram_webhooks Telegram.bots[:wifoot_staging] => TelegramWebhooksController
-  telegram_webhooks Telegram.bots[:reiro] => TelegramWebhooksReiroController
+  telegram_webhooks Telegram.bots[:wifoot] => TelegramWebhooksReiroController
 
   mount Messenger::Bot::Space => "/webhook"
 
