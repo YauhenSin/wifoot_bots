@@ -23,10 +23,10 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     reply_with :message, text: result.to_s
   end
 
-  def matches(*)
-    result = JSON.parse(get_data_from_url(@urls[:matches]))
-    reply_with :message, text: result.to_s
-  end
+  #def matches(*)
+  #  result = JSON.parse(get_data_from_url(@urls[:matches]))
+  #  reply_with :message, text: result.to_s
+  #end
 
   def help(*)
     reply_with :message, text: <<-TXT.strip_heredoc

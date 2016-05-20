@@ -24,7 +24,7 @@ class WifootBot
   	Bot.deliver(
       recipient: sender,
       message: {
-        text: result.to_s
+        text: result.to_s[0..319]
       }
     )
   end
@@ -34,7 +34,7 @@ class WifootBot
   	Bot.deliver(
       recipient: sender,
       message: {
-        text: result[0].to_s
+        text: result[0].to_s[0..319]
       }
     )
   end
@@ -44,7 +44,7 @@ class WifootBot
   	Bot.deliver(
       recipient: sender,
       message: {
-        text: result.to_s
+        text: result.to_s[0..319]
       }
     )
   end
@@ -54,7 +54,7 @@ class WifootBot
   	Bot.deliver(
       recipient: sender,
       message: {
-        text: result.to_s
+        text: result.to_s[0..319]
       }
     )
   end
@@ -112,8 +112,8 @@ Bot.on :message do |message|
   	bot.categories
   when '/bets'
   	bot.bets
-  when '/matches'
-  	bot.matches
+  #when '/matches'
+  #	bot.matches
   when '/leagues'
   	bot.leagues
   when '/help'
