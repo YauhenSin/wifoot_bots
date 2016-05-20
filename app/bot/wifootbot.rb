@@ -24,7 +24,7 @@ class WifootBot
   	Bot.deliver(
       recipient: sender,
       message: {
-        text: result
+        text: result.to_s
       }
     )
   end
@@ -34,7 +34,7 @@ class WifootBot
   	Bot.deliver(
       recipient: sender,
       message: {
-        text: result[0]
+        text: result[0].to_s
       }
     )
   end
@@ -44,7 +44,7 @@ class WifootBot
   	Bot.deliver(
       recipient: sender,
       message: {
-        text: result
+        text: result.to_s
       }
     )
   end
@@ -54,7 +54,7 @@ class WifootBot
   	Bot.deliver(
       recipient: sender,
       message: {
-        text: result
+        text: result.to_s
       }
     )
   end
@@ -116,6 +116,8 @@ Bot.on :message do |message|
   	bot.matches
   when '/leagues'
   	bot.leagues
+  when '/help'
+  	bot.help
   else
   	bot.help
   end	
