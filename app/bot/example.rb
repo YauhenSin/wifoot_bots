@@ -1,3 +1,4 @@
+require 'json'
 include Facebook::Messenger
 
 Bot.on :message do |message|
@@ -8,3 +9,6 @@ Bot.on :message do |message|
     }
   )
 end
+
+
+#https://github.com/hyperoslo/facebook-messenger-demo/blob/master/app/bots/product_bot.rb
