@@ -25,6 +25,8 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       Available cmds:
       /categories - Get All Categories
       /bets - Get All Available Bets
+      /leagues - Get All leagues
+      /matches - Get All matches
     TXT
   end
 
