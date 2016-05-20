@@ -1,6 +1,6 @@
-require 'net/http'
 class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
+  include ApiGetData
   context_to_action!
 
   def start(*)
@@ -8,10 +8,8 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def categories(*)
-    uri = URI('http://demo.wifoot.ht/api/web-services/getCategory.php')
-    res = Net::HTTP.get_response(uri)
-    resp = res.body if res.is_a?(Net::HTTPSuccess)
-    reply_with :message, text: resp
+    result = get_data_from_url(@urls[:categories])
+    reply_with :message, text: result
   end
 
   def help(*)
