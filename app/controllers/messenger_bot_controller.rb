@@ -6,9 +6,7 @@ class MessengerBotController < ActionController::Base
     case message
     when "/categories"
       result = ''
-      data = get_data_from_url(@urls[:categories])
-      puts result
-      puts result.class
+      data = JSON.parse(get_data_from_url(@urls[:categories]))
       data.each do |d|
         result += d['event_name']
       end
