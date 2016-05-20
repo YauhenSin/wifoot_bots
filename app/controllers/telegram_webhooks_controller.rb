@@ -9,15 +9,23 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def categories(*)
-    result = get_data_from_url(@urls[:categories])
+    result = JSON.parse(get_data_from_url(@urls[:categories]))
     reply_with :message, text: result.to_s
   end
 
   def bets(*)
-    result = get_data_from_url(@urls[:available_bets])
-    result = JSON.parse(result)
-    puts result.class
+    result = JSON.parse(get_data_from_url(@urls[:available_bets]))
     reply_with :message, text: result[0].to_s
+  end
+
+  def leagues(*)
+    result = JSON.parse(get_data_from_url(@urls[:leagues]))
+    reply_with :message, text: result.to_s
+  end
+
+  def matches(*)
+    result = JSON.parse(get_data_from_url(@urls[:matches]))
+    reply_with :message, text: result.to_s
   end
 
   def help(*)

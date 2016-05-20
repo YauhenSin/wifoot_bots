@@ -12,7 +12,7 @@ class WifootBot
 
   def hello
   	Bot.deliver(
-      recipient: message.sender,
+      recipient: sender,
       message: {
         text: 'Hello, human!'
       }
@@ -22,7 +22,7 @@ class WifootBot
   def categories
   	result = JSON.parse(get_data_from_url('http://demo.wifoot.ht/api/web-services/getCategory.php'))
   	Bot.deliver(
-      recipient: message.sender,
+      recipient: sender,
       message: {
         text: result
       }
@@ -32,7 +32,7 @@ class WifootBot
   def bets
   	result = JSON.parse(get_data_from_url('http://demo.wifoot.ht/api/web-services/getAllAvailableBet.php'))
   	Bot.deliver(
-      recipient: message.sender,
+      recipient: sender,
       message: {
         text: result[0]
       }
@@ -42,7 +42,7 @@ class WifootBot
   def leagues
   	result = JSON.parse(get_data_from_url('http://demo.wifoot.ht/api/web-services/getAllLeagues.php'))
   	Bot.deliver(
-      recipient: message.sender,
+      recipient: sender,
       message: {
         text: result
       }
@@ -52,7 +52,7 @@ class WifootBot
   def matches
   	result = JSON.parse(get_data_from_url('http://demo.wifoot.ht/api/web-services/getMatchByApiID.php'))
   	Bot.deliver(
-      recipient: message.sender,
+      recipient: sender,
       message: {
         text: result
       }
