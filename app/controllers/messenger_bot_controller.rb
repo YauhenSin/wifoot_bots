@@ -3,14 +3,16 @@ class MessengerBotController < ActionController::Base
 
   def message(event, sender)
     message = event['message']['text']
-    puts "____________________-"
-    puts message
-    puts "____________________________"
     case message
-    when "categories"
-      result = get_data_from_url(@urls[:categories])
+    when "/categories"
+      result = ''
+      data = get_data_from_url(@urls[:categories])
       puts result
-      sender.reply({ text: result })
+      puts result.class
+      data.each do |d|
+        result += d['event_name']
+      end
+      sender.reply({ text: "#{result}" })
     when '/start'
       sender.reply({ text: "I am a bot" })
     end

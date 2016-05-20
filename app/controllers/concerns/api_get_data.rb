@@ -8,7 +8,10 @@ module ApiGetData
 
   def api_urls
   	@urls = {
-  		categories: 'http://demo.wifoot.ht/api/web-services/getCategory.php'
+  		categories: 'http://demo.wifoot.ht/api/web-services/getCategory.php',
+  		available_bets: 'http://demo.wifoot.ht/api/web-services/getAllAvailableBet.php',
+  		leagues: 'http://demo.wifoot.ht/api/web-services/getAllLeagues.php',
+  		matches: 'http://demo.wifoot.ht/api/web-services/getMatchByApiID.php'
   	}
   end
 

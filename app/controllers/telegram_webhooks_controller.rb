@@ -9,17 +9,19 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def categories(*)
     result = get_data_from_url(@urls[:categories])
-    reply_with :message, text: result
+    reply_with :message, text: result.to_s
+  end
+
+  def bets(*)
+    result = get_data_from_url(@urls[:available_bets])
+    reply_with :message, text: result.to_s
   end
 
   def help(*)
     reply_with :message, text: <<-TXT.strip_heredoc
       Available cmds:
-      /memo %text% - Saves text to session.
-      /remind_me - Replies with text from session.
-      /keyboard - Simple keyboard.
-      /inline_keyboard - Inline keyboard example.
-      Bot supports inline queries. Enable it in @BotFather.
+      /categories - Get All Categories
+      /bets - Get All Available Bets
     TXT
   end
 
