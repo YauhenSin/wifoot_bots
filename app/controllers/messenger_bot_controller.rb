@@ -19,9 +19,6 @@ class MessengerBotController < ActionController::Base
   end
 
   def delivery(event, sender)
-    puts "EVENT delivery"
-    puts event
-    puts sender
   end
 
   def postback(event, sender)

@@ -1,3 +1,4 @@
+require 'json'
 class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
   include ApiGetData
@@ -14,7 +15,9 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def bets(*)
     result = get_data_from_url(@urls[:available_bets])
-    reply_with :message, text: result.to_s
+    result = JSON.parse(result)
+    puts result.class
+    reply_with :message, text: result[0].to_s
   end
 
   def help(*)
