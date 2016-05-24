@@ -37,7 +37,7 @@ class WifootBot
   end
 
   def team
-    result = JSON.parse(get_data_params('http://demo.wifoot.ht/api/web-services/getClubInfo.php', {"id" => 15}))
+    result = get_data_params('http://demo.wifoot.ht/api/web-services/getClubInfo.php', {"id" => 15})
     result = format_teams(result)
     bot_deliver(result)
   end
