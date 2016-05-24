@@ -9,24 +9,24 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def categories(*)
-    result = JSON.parse(get_data_from_url(@urls[:categories]))
+    result = get_data_from_url(@urls[:categories])
     reply_with :message, text: result.to_s
   end
 
   def bets(*)
-    result = JSON.parse(get_data_from_url(@urls[:available_bets]))
+    result = get_data_from_url(@urls[:get_available_bets])
     reply_with :message, text: result[0].to_s
   end
 
   def leagues(*)
-    result = JSON.parse(get_data_from_url(@urls[:leagues]))
+    result = get_data_from_url(@urls[:leagues])
     reply_with :message, text: result.to_s
   end
 
-  #def matches(*)
-  #  result = JSON.parse(get_data_from_url(@urls[:matches]))
-  #  reply_with :message, text: result.to_s
-  #end
+  def matches(*)
+   result = get_data_params(@urls[:matches], {id: 1})
+   reply_with :message, text: result.to_s
+  end
 
   def help(*)
     reply_with :message, text: <<-TXT.strip_heredoc
@@ -89,7 +89,33 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def message(message)
-    reply_with :message, text: "You wrote: #{message['text']}"
+    case message['text'].downcase
+    when /hello/i
+      result = 'Hi, How can I help you today?'
+    when /leagues|league/i
+      result = get_data_from_url(@urls[:leagues])
+      result = format_leagues(result)
+    when /categories|category/i
+      result = get_data_from_url(@urls[:categories])
+      result = format_categories(result)
+    when /bets|bet/i
+      result = get_data_from_url(@urls[:get_available_bets])[0..10]
+    when /stats|stat/i
+      result = get_data_params(@urls[:get_club_info], {"id" => 15})
+      result = format_teams(result)
+    when /help/i
+      result = <<-TXT.strip_heredoc
+                Available cmds:
+                categories - Get All Categories
+                bets - Get All Available Bets
+                leagues - Get All leagues
+                stats - Get stats of the Club
+              TXT
+    else
+      result = "Sorry I can't recognize this phrase. Type help to see how I work"
+    end
+
+    reply_with :message, text: result.to_s
   end
 
   def inline_query(query, offset)
