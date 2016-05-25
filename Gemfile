@@ -61,4 +61,3 @@ group :development do
   gem 'rspec-its'
   gem 'spring-commands-rspec'
 end
-

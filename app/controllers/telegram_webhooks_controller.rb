@@ -5,27 +5,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   context_to_action!
 
   def start(*)
-    reply_with :message, text: 'Hi there!'
-  end
-
-  def categories(*)
-    result = get_data_from_url(@urls[:categories])
-    reply_with :message, text: result.to_s
-  end
-
-  def bets(*)
-    result = get_data_from_url(@urls[:get_available_bets])
-    reply_with :message, text: result[0].to_s
-  end
-
-  def leagues(*)
-    result = get_data_from_url(@urls[:leagues])
-    reply_with :message, text: result.to_s
-  end
-
-  def matches(*)
-   result = get_data_params(@urls[:matches], {id: 1})
-   reply_with :message, text: result.to_s
+    reply_with :message, text: 'Hi, I am Wifoot Bot. Ask me about recent matches and bettings. Type "help" to see all supported commands'
   end
 
   def help(*)
@@ -90,27 +70,49 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def message(message)
     case message['text'].downcase
-    when /hello/i
+    when /hello|hi|hey|welcome|salutatuion|hey|greeting|yo|aloha|howdy|hiya|good day|good morning|salute/i
       result = 'Hi, How can I help you today?'
     when /leagues|league/i
+      session[:stage] = 1
       result = get_data_from_url(@urls[:leagues])
       result = format_leagues(result)
     when /categories|category/i
       result = get_data_from_url(@urls[:categories])
       result = format_categories(result)
+    when /matches/i
+      if /current/.match(message['text'].downcase)
+        result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 2})
+      elsif /future|not started|not start/.match(message['text'].downcase)
+        result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 1})
+      elsif /finished|finish|ended/.match(message['text'].downcase)
+        result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
+      else
+        result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
+      end
+      result = format_matches(result)
     when /bets|bet/i
       result = get_data_from_url(@urls[:get_available_bets])[0..10]
     when /stats|stat/i
-      result = get_data_params(@urls[:get_club_info], {"id" => 15})
+      club_name = message['text'].split(/\W+/).last
+      result = get_data_params(@urls[:get_club_info], {"name" => club_name})
       result = format_teams(result)
-    when /help/i
+    when /help|support|assist|aid/i
       result = <<-TXT.strip_heredoc
-                Available cmds:
-                categories - Get All Categories
-                bets - Get All Available Bets
-                leagues - Get All leagues
-                stats - Get stats of the Club
+                 Available cmds:
+                'categories' - Get All Categories
+                'stats of clubname' - Get stats of the teams
+                'leagues' - Get All leagues
+                'help' - Get Help list
               TXT
+    when /\d/i
+      if session[:stage] == 1
+        id = /\d/.match(message['text'])
+        result = get_data_params(@urls[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
+        result = format_matches(result)
+        puts result
+      else
+        result = "Please, select category to search"
+      end
     else
       result = "Sorry I can't recognize this phrase. Type help to see how I work"
     end

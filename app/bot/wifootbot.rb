@@ -45,9 +45,10 @@ class WifootBot
   def help
     bot_deliver(<<-TXT.strip_heredoc
                     Available cmds:
-                    /categories - Get All Categories
-                    /bets - Get All Available Bets
-                    /leagues - Get All leagues
+                    'categories' - Get All Categories
+                    'stats of clubname' - Get stats of the teams
+                    'leagues' - Get All leagues
+                    'help' - Get Help list
                 TXT
                 )
   end
