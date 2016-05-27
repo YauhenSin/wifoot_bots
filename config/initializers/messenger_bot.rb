@@ -9,4 +9,4 @@ Facebook::Messenger.configure do |config|
   config.verify_token = '123123123123'
 end
 
-
+Facebook::Messenger::Subscriptions.subscribe
