@@ -5,7 +5,8 @@
 # end
 
 Facebook::Messenger.configure do |config|
-  config.access_token = 'EAAZAi54p5yFUBABrXZCP4QvUiStJxWUy3CRcUfsLqidZBHTpXsUFJdgiKjGamFWjvFUsMPIaJGt433JzRU25uu5yJe4x1fhEZANI8D5Og6JKLyavqVEtmTKU8cgAKcNgM8ZBLrvG5SprDmAlQjFB5CvkJWFgLjZByE7VcYNjILZBgZDZD'
-  #config.app_secret = 'bfe714074d9869064b75f059f09011ef'
+  config.access_token = 'EAAZAi54p5yFUBAPYdwqqTQklZBiOxuTub2OUbApp6C5qR3LmcwjOw47fJnZB9PzuXkslfdHpIcMeZClX8ZBX5Cj3WDcGNOcwvCB3hKcOAdhpe9KYlctMc8nCtadzWvNWoTEkVuZAweZB95C3dZCfJzMkUvJpqklnKh8ycZAaHasGP6QZDZD'
   config.verify_token = '123123123123'
 end
+
+

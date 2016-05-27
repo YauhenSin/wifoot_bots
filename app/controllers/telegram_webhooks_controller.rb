@@ -116,9 +116,11 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       result = <<-TXT.strip_heredoc
                  Available cmds:
                 'categories' - Get All Categories
-                'stats of clubname' - Get stats of the teams
                 'leagues' - Get All leagues
+                'stats of clubname' - Get stats of the teams
                 'matches (current future past)' - Get All Matches
+                'scores of clubname' - Get all matches with the club
+                'players of clubname' - Get all players in the club
                 'help' - Get Help list
               TXT
     when /\d/i
