@@ -69,6 +69,10 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def message(message)
+    puts "SESSION STAGE"
+    puts session[:stage]
+
+
     case message['text'].downcase
     when /hello|hi|hey|welcome|salutatuion|hey|greeting|yo|aloha|howdy|hiya|good day|good morning|salute/i
       result = 'Hi, How can I help you today?'
@@ -82,26 +86,39 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     when /matches/i
       if /current/.match(message['text'].downcase)
         result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 2})
-      elsif /future|not started|not start/.match(message['text'].downcase)
+      elsif /future|upcoming|up coming/.match(message['text'].downcase)
         result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 1})
-      elsif /finished|finish|ended/.match(message['text'].downcase)
+      elsif /finished|finish|ended|past/.match(message['text'].downcase)
         result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
       else
         result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
       end
       result = format_matches(result)
+      session[:stage] = 2
     when /bets|bet/i
       result = get_data_from_url(@urls[:get_available_bets])[0..10]
     when /stats|stat/i
-      club_name = message['text'].split(/\W+/).last
+      club_name = find_club_name(message['text'])
       result = get_data_params(@urls[:get_club_info], {"name" => club_name})
       result = format_teams(result)
+    when /scores|score/i
+      club_name = find_club_name(message['text'])
+      result = get_data_params(@urls[:get_matches_by_club], {"name" => club_name, "page_id" => 0, "curr_status" => 3})
+      result = format_club_scores(result)
+      session[:stage] = 2
+    when /players|team details/i
+      club_name = find_club_name(message['text'])
+      club_id = get_data_params(@urls[:get_club_info], {"name" => club_name}).first["api_id"]
+      result = get_data_params(@urls[:get_players_by_club], {"id" => club_id})
+      result = format_players(result)
+      session[:stage] = 3
     when /help|support|assist|aid/i
       result = <<-TXT.strip_heredoc
                  Available cmds:
                 'categories' - Get All Categories
                 'stats of clubname' - Get stats of the teams
                 'leagues' - Get All leagues
+                'matches (current future past)' - Get All Matches
                 'help' - Get Help list
               TXT
     when /\d/i
@@ -109,7 +126,20 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
         id = /\d/.match(message['text'])
         result = get_data_params(@urls[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
         result = format_matches(result)
-        puts result
+        session[:stage] = 2
+      elsif session[:stage] == 2
+        num = /\d/.match(message['text'])[0].to_i
+        id = session[:data][num]
+        puts id
+        result = get_data_params(@urls[:get_match_by_id], {"id" => id})
+        result = format_match(result)
+        session[:stage] = 0
+      elsif session[:stage] == 3
+        num = /\d/.match(message['text'])[0].to_i
+        id = session[:data][num]
+        result = get_data_params(@urls[:get_player_by_id], {"id" => id})
+        result = format_player(result)
+        #session[:stage] = 0
       else
         result = "Please, select category to search"
       end
