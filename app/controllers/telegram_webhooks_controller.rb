@@ -10,12 +10,15 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def help(*)
     reply_with :message, text: <<-TXT.strip_heredoc
-      Available cmds:
-      /categories - Get All Categories
-      /bets - Get All Available Bets
-      /leagues - Get All leagues
-      /matches - Get All matches
-    TXT
+                 Available cmds:
+                'categories' - Get All Categories
+                'leagues' - Get All leagues
+                'stats of clubname' - Get stats of the teams
+                'matches (current future past)' - Get All Matches
+                'scores of clubname' - Get all matches with the club
+                'players of clubname' - Get all players in the club
+                'help' - Get Help list
+              TXT
   end
 
   def memo(*args)
@@ -69,10 +72,6 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def message(message)
-    puts "SESSION STAGE"
-    puts session[:stage]
-
-
     case message['text'].downcase
     when /hello|hi|hey|welcome|salutatuion|hey|greeting|yo|aloha|howdy|hiya|good day|good morning|salute/i
       result = 'Hi, How can I help you today?'

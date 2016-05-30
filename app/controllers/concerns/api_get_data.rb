@@ -36,9 +36,6 @@ module ApiGetData
   	uri = URI.parse(url)
   	http = Net::HTTP.new(uri.host, uri.port)
   	response = http.post(uri.path, params.to_query)
-    puts session[:data]
-    puts params.to_query
-    puts response.body
   	return JSON.parse(response.body)
   end
 
