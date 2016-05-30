@@ -199,7 +199,7 @@ class WifootBot
     else
       result =  "result is empty"
     end
-    @data] = data_ids
+    @data = data_ids
     return result
   end
 
