@@ -46,6 +46,7 @@ class WifootBot
   def leagues
   	result = get_data_from_url(URLS[:leagues])
   	result = format_leagues(result)
+    @stage = 1
     bot_deliver(result)
   end
 
@@ -88,6 +89,8 @@ class WifootBot
   end
 
   def number_selection
+    puts @stage
+    puts "number_selection"
     if @stage == 1
       id = /\d/.match(@payload)
       result = get_data_params(URLS[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
@@ -128,12 +131,27 @@ class WifootBot
   end
 
   def bot_deliver(msg)
-    Bot.deliver(
-      recipient: sender,
-      message: {
-        text: msg.to_s[0..319]
-      }
-    )
+    cutting_msgs(msg).each do |msg|
+        Bot.deliver(
+          recipient: sender,
+          message: {
+            text: msg.to_s[0..319]
+          }
+        )
+    end
+  end
+
+  def cutting_msgs(msg)
+    result = []
+    from = 0
+    to = from + 319
+
+    (msg.size/320 + 1).times do |n|
+      result << msg[from..to]
+      from += 319
+      to += 319
+    end
+    return result
   end
 
   def get_data_from_url(url)
@@ -161,7 +179,7 @@ class WifootBot
     result = "Get All Leagues\n"
     #{"id":"1","name":"Premier League","image":"1414123273logo_barclays.png","status":"1","api_id":"1"}
     data.each_with_index do |d, i|
-      result << "#{i+1})#{d["name"]} - Status:#{d["status"]} - API_ID:#{d["api_id"]}\n"
+      result << "#{i+1})#{d["name"]}\n"
     end
     return result
   end
@@ -170,7 +188,7 @@ class WifootBot
     result = "Get All Categories\n"
     # {"event_category_id":"1","event_name":"Win\/Lose\/Draw","event_rule_id":"0","event_name_creole":"Kale\/Pedu\/Match Nil","image":"1_win_lose_draw.png"}
     data.each_with_index do |d, i|
-      result << "#{i+1})#{d["event_name"]} - event_name_creole:#{d["event_name_creole"]}\n"
+      result << "#{i+1})#{d["event_name"]}\n"
     end
     return result
   end
@@ -180,7 +198,7 @@ class WifootBot
     result = ""
     if data.is_a?(Array)
       data.each_with_index do |d, i|
-        result << "#{i+1})#{d["name"]} - Played:#{d["played"]} - WIN:#{d["win"]} - DRAW:#{d["draw"]} - LOSE:#{d["lose"]}\nPoints: #{d["point"]} - \nClubUrl:#{d["clubUrl"]}"
+        result << "#{i+1})#{d["name"]}\nPlayed: #{d["played"]}; WIN: #{d["win"]}; DRAW: #{d["draw"]}; LOSE: #{d["lose"]}\nPoints: #{d["point"]}\nClub Url: #{d["clubUrl"]}"
         end
     else
       result =  "result is empty"
@@ -214,7 +232,7 @@ class WifootBot
     if data.is_a?(Array)
       data.each_with_index do |d, i|
         time = Time.at(d["match_time"].to_f/1000).strftime("%m.%d.%Y at %I:%M%p")
-        result << "#{i+1})Match Time: #{time}\nHome:#{d["0"]["home"][0]["name"]} - Away:#{d["1"]["away"][0]["name"]}\nScores: #{d["home_score"]} : #{d["away_score"]}\n"
+        result << "#{i+1})Match Time: #{time}\nHome: #{d["0"]["home"][0]["name"]} - Away: #{d["1"]["away"][0]["name"]}\nScores: #{d["home_score"]} : #{d["away_score"]}\n"
         result << "\n"
         data_ids[i+1] = d["match_id"]
       end

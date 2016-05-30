@@ -36,6 +36,7 @@ Bot.on :message do |message|
   when /players|team details/i
     bot.players
   when /\d/i
+    puts 'number'
     bot.number_selection
   when /help|support|assist|aid/i
     bot.help
