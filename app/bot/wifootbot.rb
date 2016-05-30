@@ -14,11 +14,13 @@ require 'facebook_bot'
 
 #   request.parsed_response
 # end
+# bots = []
 
 Bot.on :message do |message|
   puts "Received #{message.text} from #{message.sender}"
 
-  bot = WifootBot.new(message.sender, message.text)
+  bot = WifootBot.new(message.sender, message.text, session[:fb_stage], session[:fb_data])
+  # bot.payload = message.text
 
   case message.text.downcase
   when /hello|hi|hey|welcome|salutatuion|hey|greeting|yo|aloha|howdy|hiya|good day|good morning|salute/i

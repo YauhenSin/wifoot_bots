@@ -1,11 +1,14 @@
 require 'json'
 class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
+  include Telegram::Bot::UpdatesController::Session
   include ApiGetData
   context_to_action!
+  use_session!
 
   def start(*)
     reply_with :message, text: 'Hi, I am Wifoot Bot. Ask me about recent matches and bettings. Type "help" to see all supported commands'
+    send_photo
   end
 
   def help(*)
