@@ -1,4 +1,5 @@
 require 'json'
+require "open-uri"
 class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
   include Telegram::Bot::UpdatesController::Session
@@ -7,8 +8,15 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   use_session!
 
   def start(*)
-    reply_with :message, text: 'Hi, I am Wifoot Bot. Ask me about recent matches and bettings. Type "help" to see all supported commands'
-    send_photo
+    session[:stage] = 1
+    result = get_data_from_url(@urls[:leagues])
+    result = format_leagues(result)
+    reply_with :message, text: "Welcome to WiFoot!\n" + result
+  end
+
+
+  def image(*)
+    reply_with :photo, photo: open('http://bykvu.com/images/thumbnails2/images/2015/11/comedy-hamster_3497562b-fill-600x375.jpg').read, caption: "It's incredible!"
   end
 
   def help(*)

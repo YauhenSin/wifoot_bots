@@ -48,7 +48,7 @@ module ApiGetData
   end
 
   def format_leagues(data)
-  	result = "Get All Leagues\n"
+  	result = "Available leagues:\n"
   	#{"id":"1","name":"Premier League","image":"1414123273logo_barclays.png","status":"1","api_id":"1"}
   	data.each_with_index do |d, i|
   		result << "#{i+1})#{d["name"]} - Status:#{d["status"]} - API_ID:#{d["api_id"]}\n"

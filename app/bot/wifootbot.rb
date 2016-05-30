@@ -14,7 +14,7 @@ require 'facebook_bot'
 
 #   request.parsed_response
 # end
-bots = []
+
 stage = 0
 Bot.on :message do |message|
   puts "Received #{message.text} from #{message.sender}"

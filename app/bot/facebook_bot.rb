@@ -28,10 +28,6 @@ class WifootBot
     @data = data
   end
 
-  def find_or_create(sender)
-
-  end
-
   def hello
     bot_deliver('Hi, How can I help you today?')
   end
@@ -100,6 +96,7 @@ class WifootBot
       id = /\d/.match(@payload)
       result = get_data_params(URLS[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
       result = format_matches(result)
+      puts result
       @stage = 2
     elsif @stage == 2
       num = /\d/.match(@payload)[0].to_i
@@ -230,11 +227,13 @@ class WifootBot
   end
 
   def format_player(data)
+    puts data
     d = data.first
     "#{d["name"]}\n#Position:#{d["position"]} - Number:#{d["number"]}\nHeight:#{d["height"]} - Weight:#{d["weight"]} - Age:#{d["0"]["age"]}\nNationality:#{d["nationality"]}"
   end
 
   def format_matches(data)
+    puts data
     result = ""
     data_ids = {}
     if data.is_a?(Array)
