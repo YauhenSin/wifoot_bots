@@ -24,7 +24,7 @@ class WifootBot
   def initialize(sender, payload, stage = 0, data = {})
     @sender = sender
     @payload = payload
-    session[:fb_stage] = stage
+    @stage = stage
     @data = data
   end
 
@@ -50,7 +50,7 @@ class WifootBot
   def leagues
   	result = get_data_from_url(URLS[:leagues])
   	result = format_leagues(result)
-    session[:fb_stage] = 1
+    @stage = 1
     bot_deliver(result)
   end
 
@@ -65,6 +65,7 @@ class WifootBot
       result = get_data_params(URLS[:matches], {"page_id" => 0, "curr_status" => 3})
     end
   	result = format_matches(result)
+    @stage = 2
   	bot_deliver(result)
   end
 
@@ -79,7 +80,7 @@ class WifootBot
     club_name = find_club_name(@payload)
     result = get_data_params(URLS[:get_matches_by_club], {"name" => club_name, "page_id" => 0, "curr_status" => 3})
     result = format_club_scores(result)
-    session[:fb_stage] = 2
+    @stage = 2
     bot_deliver(result)
   end
 
@@ -88,29 +89,29 @@ class WifootBot
     club_id = get_data_params(URLS[:get_club_info], {"name" => club_name}).first["api_id"]
     result = get_data_params(URLS[:get_players_by_club], {"id" => club_id})
     result = format_players(result)
-    session[:fb_stage] = 3
+    @stage = 3
     bot_deliver(result)
   end
 
   def number_selection
-    puts session[:fb_stage]
+    puts @stage
     puts "number_selection"
-    if session[:fb_stage] == 1
+    if @stage == 1
       id = /\d/.match(@payload)
       result = get_data_params(URLS[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
       result = format_matches(result)
-      session[:fb_stage] = 2
-    elsif session[:fb_stage] == 2
+      @stage = 2
+    elsif @stage == 2
       num = /\d/.match(@payload)[0].to_i
       id = @data[num]
-      id = session[:fb_data][num]
+      #id = session[:fb_data][num]
       result = get_data_params(URLS[:get_match_by_id], {"id" => id})
       result = format_match(result)
-      session[:fb_stage] = 0
-    elsif session[:fb_stage] == 3
+      @stage = 0
+    elsif @stage == 3
       num = /\d/.match(@payload)[0].to_i
       id = @data[num]
-      id = session[:fb_data][num]
+      #id = session[:fb_data][num]
       result = get_data_params(URLS[:get_player_by_id], {"id" => id})
       result = format_player(result)
     else
@@ -225,7 +226,6 @@ class WifootBot
       result =  "result is empty"
     end
     @data = data_ids
-    session[:fb_data] = data_ids
     return result
   end
 
@@ -248,7 +248,6 @@ class WifootBot
       result =  "result is empty"
     end
     @data = data_ids
-    session[:fb_data] = data_ids
     return result
   end
 
@@ -272,7 +271,6 @@ class WifootBot
       result =  "result is empty"
     end
     @data = data_ids
-    session[:fb_data] = data_ids
     return result
   end
 end

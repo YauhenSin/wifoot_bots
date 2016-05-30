@@ -14,12 +14,12 @@ require 'facebook_bot'
 
 #   request.parsed_response
 # end
-# bots = []
-
+bots = []
+stage = 0
 Bot.on :message do |message|
   puts "Received #{message.text} from #{message.sender}"
 
-  bot = WifootBot.new(message.sender, message.text, session[:fb_stage], session[:fb_data])
+  bot = WifootBot.new(message.sender, message.text, stage)
   # bot.payload = message.text
 
   case message.text.downcase
@@ -27,18 +27,21 @@ Bot.on :message do |message|
     bot.hello
   when /leagues|league/i
     bot.leagues
+    stage = 1
   when /categories|category/i
     bot.categories
   when /matches/i
     bot.matches
+    stage = 2
   when /stats|stat/i
     bot.stats
   when /scores|score/i
     bot.scores
+    stage = 2
   when /players|team details/i
     bot.players
+    stage = 3
   when /\d/i
-    puts 'number'
     bot.number_selection
   when /help|support|assist|aid/i
     bot.help
