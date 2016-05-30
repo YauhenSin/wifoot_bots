@@ -2,7 +2,7 @@ require 'json'
 
 CLUB_NAMES = ["chelsea", "man city", "southampton", "west ham", "liverpool", "man united", "arsenal", "swansea", "tottenham", "stoke", "bournemouth", "aston villa", "everton", "west brom", "leicester", "crystal palace", "sunderland", "newcastle", "watford", "norwich", "bayern munich", "m'gladbach", "mainz", "hoffenheim", "wolfsburg", "leverkusen", "ingolstadt", "ein frankfurt", "schalke 04", "hannover", "fc koln", "augsburg", "hertha", "dortmund", "stuttgart", "hamburg", "darmstadt", "werder bremen", "juventus", "roma", "sampdoria", "milan", "udinese", "lazio", "napoli", "verona", "inter", "genoa", "fiorentina", "torino", "empoli", "atalanta", "carpi", "palermo", "bologna", "chievo", "sassuolo", "frosinone", "marseille", "paris sg", "bordeaux", "lyon", "st etienne", "nantes", "angers", "lille", "toulouse", "monaco", "montpellier", "nice", "rennes", "stade de reims", "lorient", "bastia", "gfco ajaccio", "caen", "guingamp", "troyes", "barcelona", "sevilla", "real madrid", "valencia", "ath madrid", "villarreal", "celta vigo", "malaga", "vallecano", "getafe", "espanol", "eibar", "betis", "granada", "la coruna", "sociedad", "ath bilbao", "las palmas", "levante", "sp gijon", "carpi"]
 API_URL = 'http://demo.wifoot.ht/api/web-services/'
-@urls = {
+URLS = {
       categories: API_URL+'getCategory.php',
       leagues: API_URL+'getAllLeagues.php',
       matches: API_URL+'getAllMatches.php',
@@ -33,7 +33,7 @@ class WifootBot
   end
 
   def categories
-  	result = get_data_from_url(@urls[:categories])
+  	result = get_data_from_url(URLS[:categories])
   	result = format_categories(result)
     bot_deliver(result)
   end
@@ -44,20 +44,20 @@ class WifootBot
   end
 
   def leagues
-  	result = get_data_from_url(@urls[:leagues])
+  	result = get_data_from_url(URLS[:leagues])
   	result = format_leagues(result)
     bot_deliver(result)
   end
 
   def matches
     if /current/.match(@payload.downcase)
-      result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 2})
+      result = get_data_params(URLS[:matches], {"page_id" => 0, "curr_status" => 2})
     elsif /future|upcoming|up coming/.match(@payload.downcase)
-      result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 1})
+      result = get_data_params(URLS[:matches], {"page_id" => 0, "curr_status" => 1})
     elsif /finished|finish|ended|past/.match(@payload.downcase)
-      result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
+      result = get_data_params(URLS[:matches], {"page_id" => 0, "curr_status" => 3})
     else
-      result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
+      result = get_data_params(URLS[:matches], {"page_id" => 0, "curr_status" => 3})
     end
   	result = format_matches(result)
   	bot_deliver(result)
@@ -65,14 +65,14 @@ class WifootBot
 
   def stats
     club_name = find_club_name(@payload)
-    result = get_data_params(@urls[:get_club_info], {"name" => club_name})
+    result = get_data_params(URLS[:get_club_info], {"name" => club_name})
     result = format_teams(result)
     bot_deliver(result)
   end
 
   def scores
     club_name = find_club_name(@payload)
-    result = get_data_params(@urls[:get_matches_by_club], {"name" => club_name, "page_id" => 0, "curr_status" => 3})
+    result = get_data_params(URLS[:get_matches_by_club], {"name" => club_name, "page_id" => 0, "curr_status" => 3})
     result = format_club_scores(result)
     @stage = 2
     bot_deliver(result)
@@ -80,8 +80,8 @@ class WifootBot
 
   def players
     club_name = find_club_name(@payload)
-    club_id = get_data_params(@urls[:get_club_info], {"name" => club_name}).first["api_id"]
-    result = get_data_params(@urls[:get_players_by_club], {"id" => club_id})
+    club_id = get_data_params(URLS[:get_club_info], {"name" => club_name}).first["api_id"]
+    result = get_data_params(URLS[:get_players_by_club], {"id" => club_id})
     result = format_players(result)
     @stage = 3
     bot_deliver(result)
@@ -90,19 +90,19 @@ class WifootBot
   def number_selection
     if @stage == 1
       id = /\d/.match(@payload)
-      result = get_data_params(@urls[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
+      result = get_data_params(URLS[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
       result = format_matches(result)
       @stage = 2
     elsif @stage == 2
       num = /\d/.match(@payload)[0].to_i
       id = @data[num]
-      result = get_data_params(@urls[:get_match_by_id], {"id" => id})
+      result = get_data_params(URLS[:get_match_by_id], {"id" => id})
       result = format_match(result)
       @stage = 0
     elsif @stage == 3
       num = /\d/.match(@payload)[0].to_i
       id = @data[num]
-      result = get_data_params(@urls[:get_player_by_id], {"id" => id})
+      result = get_data_params(URLS[:get_player_by_id], {"id" => id})
       result = format_player(result)
     else
       result = "Please, select category to search"
