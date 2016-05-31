@@ -56,6 +56,21 @@ module ApiGetData
   	return result
   end
 
+  def format_leagues_with_images(data)
+    result = []
+    data.each_with_index do |d, i|
+      hash = {}
+      hash[:text] = "#{i+1})#{d["name"]} - Status:#{d["status"]} - API_ID:#{d["api_id"]}\n"
+      hash[:image] = "#{d["image"]}"
+      result << hash
+    end
+    return result
+  end
+
+  def format_league_with_image(league)
+
+  end
+
   def format_categories(data)
   	result = "Get All Categories\n"
   	# {"event_category_id":"1","event_name":"Win\/Lose\/Draw","event_rule_id":"0","event_name_creole":"Kale\/Pedu\/Match Nil","image":"1_win_lose_draw.png"}

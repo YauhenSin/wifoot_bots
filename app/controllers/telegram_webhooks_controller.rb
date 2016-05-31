@@ -10,13 +10,22 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   def start(*)
     session[:stage] = 1
     result = get_data_from_url(@urls[:leagues])
-    result = format_leagues(result)
-    reply_with :message, text: "Welcome to WiFoot!\n" + result
+    result = format_leagues_with_images(result)
+    reply_with :message, text: "Welcome to WiFoot!\nAvailable leagues:\n"
+    result.each do |r|
+      reply_with :message, text: r[:text]
+      reply_with :photo, photo: File.open('app/assets/images/leagues/'+r[:image])
+    end
   end
 
 
   def image(*)
-    reply_with :photo, photo: open('http://bykvu.com/images/thumbnails2/images/2015/11/comedy-hamster_3497562b-fill-600x375.jpg').read, caption: "It's incredible!"
+    #puts 'start download image'
+    # File.open('hihihi.jpg', 'wb') do |fo|
+    #   fo.write open("http://bykvu.com/images/thumbnails2/images/2015/11/comedy-hamster_3497562b-fill-600x375.jpg").read 
+    # end
+    puts 'start reply photo'
+    reply_with :photo, photo: open('http://demo.wifoot.ht/image/league/1414123273logo_barclays.png').read
   end
 
   def help(*)
