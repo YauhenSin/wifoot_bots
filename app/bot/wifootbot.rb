@@ -16,10 +16,11 @@ require 'facebook_bot'
 # end
 
 stage = 0
+data = {}
 Bot.on :message do |message|
   puts "Received #{message.text} from #{message.sender}"
 
-  bot = WifootBot.new(message.sender, message.text, stage)
+  bot = WifootBot.new(message.sender, message.text, stage, data)
   # bot.payload = message.text
 
   case message.text.downcase
@@ -31,15 +32,15 @@ Bot.on :message do |message|
   when /categories|category/i
     bot.categories
   when /matches/i
-    bot.matches
+    data = bot.matches
     stage = 2
   when /stats|stat/i
     bot.stats
   when /scores|score/i
-    bot.scores
+    data = bot.scores
     stage = 2
   when /players|team details/i
-    bot.players
+    data = bot.players
     stage = 3
   when /\d/i
     bot.number_selection

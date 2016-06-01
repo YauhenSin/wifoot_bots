@@ -46,7 +46,6 @@ class WifootBot
   def leagues
   	result = get_data_from_url(URLS[:leagues])
   	result = format_leagues(result)
-    @stage = 1
     bot_deliver(result)
   end
 
@@ -60,9 +59,9 @@ class WifootBot
     else
       result = get_data_params(URLS[:matches], {"page_id" => 0, "curr_status" => 3})
     end
-  	result = format_matches(result)
-    @stage = 2
+  	result, data = format_matches(result)
   	bot_deliver(result)
+    data
   end
 
   def stats
@@ -75,46 +74,40 @@ class WifootBot
   def scores
     club_name = find_club_name(@payload)
     result = get_data_params(URLS[:get_matches_by_club], {"name" => club_name, "page_id" => 0, "curr_status" => 3})
-    result = format_club_scores(result)
-    @stage = 2
+    result, data = format_club_scores(result)
     bot_deliver(result)
+    data
   end
 
   def players
     club_name = find_club_name(@payload)
     club_id = get_data_params(URLS[:get_club_info], {"name" => club_name}).first["api_id"]
     result = get_data_params(URLS[:get_players_by_club], {"id" => club_id})
-    result = format_players(result)
-    @stage = 3
+    result, data = format_players(result)
     bot_deliver(result)
+    data
   end
 
   def number_selection
-    puts @stage
-    puts "number_selection"
     if @stage == 1
       id = /\d/.match(@payload)
       result = get_data_params(URLS[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
       result = format_matches(result)
-      puts result
-      @stage = 2
     elsif @stage == 2
       num = /\d/.match(@payload)[0].to_i
       id = @data[num]
-      #id = session[:fb_data][num]
       result = get_data_params(URLS[:get_match_by_id], {"id" => id})
       result = format_match(result)
-      @stage = 0
     elsif @stage == 3
       num = /\d/.match(@payload)[0].to_i
       id = @data[num]
-      #id = session[:fb_data][num]
       result = get_data_params(URLS[:get_player_by_id], {"id" => id})
       result = format_player(result)
     else
       result = "Please, select category to search"
     end
-    return result
+
+    bot_deliver(result)
   end
 
   def help
@@ -132,7 +125,7 @@ class WifootBot
   end
 
   def unknown
-    bot_deliver("Sorry I can't recognize this pharese. Type help to see how I work")
+    bot_deliver("Sorry I can't recognize this phrese. Type help to see how I work")
   end
 
   def bot_deliver(msg)
@@ -222,8 +215,7 @@ class WifootBot
     else
       result =  "result is empty"
     end
-    @data = data_ids
-    return result
+    return result, data_ids
   end
 
   def format_player(data)
@@ -247,7 +239,7 @@ class WifootBot
       result =  "result is empty"
     end
     @data = data_ids
-    return result
+    return result, @data
   end
 
   def format_match(data)
@@ -270,6 +262,6 @@ class WifootBot
       result =  "result is empty"
     end
     @data = data_ids
-    return result
+    return result, data
   end
 end
