@@ -88,8 +88,8 @@ module ApiGetData
     result = "Bets types\n"
     if data.is_a?(Array)
       data.each_with_index do |d, i|
-        #{"id"=>"8472", "home_id"=>"17", "away_id"=>"756", "home_score"=>"0", "away_score"=>"0", "league_id"=>"1", "FTR"=>"D", "status"=>"0", "time"=>"120", "odds"=>"0.66", "match_id"=>"373", "event_category_id"=>"1", "player_id"=>nil, "minute"=>nil, "score_type"=>nil, "event_type"=>nil, "quantity"=>nil, "bet_status"=>"1", "reference"=>nil, "generated_team"=>nil}
-        result << "#{i+1})#{d["0"]["home"][0]["name"]} #{d["home_score"]} : #{d["away_score"]} #{d["1"]["away"][0]["name"]}\nOdds: #{d["odds"]}; - Time: #{d['time']}\n"
+        #{"id"=>"8518", "home_id"=>"17", "away_id"=>"756", "home_score"=>"0", "away_score"=>"0", "league_id"=>"1", "FTR"=>"H", "status"=>"0", "time"=>"120", "odds"=>"0.23", "match_id"=>"373", "event_category_id"=>"1", "player_id"=>nil, "minute"=>nil, "score_type"=>nil, "event_type"=>nil, "quantity"=>nil, "bet_status"=>"1", "reference"=>nil, "generated_team"=>nil, "inverse_status"=>"1", "over_under"=>nil, "user_quantity"=>nil, "bet_input_id"=>"155", "user_home_score"=>nil, "user_away_score"=>nil, "0"=>{"home"=>[{"name"=>"Man United", "image"=>"1414148887logo_man_utd_large.png"}]}, "1"=>{"away"=>[{"name"=>"Bournemouth", "image"=>"1436582712afc-bournemouth-hd-logo.png"}]}}
+        result << "#{i+1})#{d["0"]["home"][0]["name"]} #{d["home_score"]} : #{d["away_score"]} #{d["1"]["away"][0]["name"]}\nOdds: #{d["odds"]}; Time: #{d['time']}; League: #{d["league_id"]}\nFTR: #{d["FTR"]}; Bet status: #{d["bet_status"]}\n"
         # data_ids[i+1] = d["event_category_id"]
       end
     else

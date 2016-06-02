@@ -26,49 +26,114 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def message(message)
-    message = message['text'].downcase
+    need_reply = true
 
-    case message
+    case message['text'].downcase
     when /hello|hi|hey|welcome|salutatuion|hey|greeting|yo|aloha|howdy|hiya|good day|good morning|salute/i
       result = 'Hi, How can I help you today?'
-      reply_with :message, text: result
     when /leagues|league/i
-      leagues
+      session[:stage] = 1
+      result = get_data_from_url(@urls[:leagues])
+      result = format_leagues_with_images(result)
+      reply_with :message, text: "Available leagues:\n"
+      result.each do |r|
+        reply_with :message, text: r[:text]
+        reply_with :sticker, sticker: File.open('app/assets/images/leagues/'+r[:image])
+      end
+      need_reply = false
     when /categories|category/i
       result = get_data_from_url(@urls[:categories])
       result = format_categories(result)
     when /matches/i
-      matches(message)
+      if /current/.match(message['text'].downcase)
+        result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 2})
+      elsif /future|upcoming|up coming/.match(message['text'].downcase)
+        result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 1})
+      elsif /finished|finish|ended|past/.match(message['text'].downcase)
+        result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
+      else
+        result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
+      end
+      result = format_matches(result)
+      session[:stage] = 2
     when /bets|bet/i
-      bets(message)
+      result = get_data_from_url(@urls[:get_available_bets])[0..10]
     when /stats|stat/i
-      stats(message)
+      club_name = find_club_name(message['text'])
+      result = get_data_params(@urls[:get_club_info], {"name" => club_name})
+      result = format_team_with_image(result)
+      reply_with :message, text: result[:text]
+      if result[:image].present?
+        # File.open('app/assets/images/club/'+result[:image], 'wb') do |fo|
+        #   fo.write open("http://demo.wifoot.ht/image/club/"+result[:image]).read 
+        # end
+        reply_with :sticker, sticker: File.open('app/assets/images/club/'+result[:image])
+      end
+        need_reply = false
     when /scores|score/i
-      scores(message)
+      club_name = find_club_name(message['text'])
+      result = get_data_params(@urls[:get_matches_by_club], {"name" => club_name, "page_id" => 0, "curr_status" => 3})
+      result = format_club_scores(result)
+      session[:stage] = 2
     when /players|details/i
-      players(message)
+      club_name = find_club_name(message['text'])
+      club_id = get_data_params(@urls[:get_club_info], {"name" => club_name}).first["api_id"]
+      result = get_data_params(@urls[:get_players_by_club], {"id" => club_id})
+      result = format_players(result)
+      session[:stage] = 3
     when /help|support|assist|aid/i
-      help
+      result = HELP
     when /\d/i
       if session[:stage] == 1
-         leagues(message)
+        id = /\d/.match(message['text'])
+        result = get_data_params(@urls[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
+        result = format_matches(result)
+        session[:stage] = 2
       elsif session[:stage] == 2
-        match(message)
+        num = /\d/.match(message['text'])[0].to_i
+        id = session[:data][num]
+        puts "THIS IS REQUESTED ID #{id}"
+        result = get_data_params(@urls[:get_match_by_id], {"id" => id})
+        result = format_match(result)
+        reply_with :message, text: result
+        result = get_data_from_url(@urls[:categories])
+        result = format_categories(result)
+        reply_with :message, text: result
+        need_reply = false
+        session[:stage] = 4
       elsif session[:stage] == 3
-        player(message)
+        num = /\d/.match(message['text'])[0].to_i
+        id = session[:data][num]
+        result = get_data_params(@urls[:get_player_by_id], {"id" => id})
+        result = format_player_with_image(result)
+        reply_with :message, text: result[:text]
+        if result[:image].present?
+          File.open('app/assets/images/players/'+result[:image], 'wb') do |fo|
+            fo.write open("http://demo.wifoot.ht/image/players/"+result[:image]).read 
+          end
+          reply_with :sticker, sticker: File.open('app/assets/images/players/'+result[:image])
+        end
+        need_reply = false
       elsif session[:stage] == 4
-        bets(message)
+        num = /\d/.match(message['text'])[0].to_i
+        id = session[:data][num]
+        params = {"id" => 0, "match_id" => session[:match_id], "category_id" => id}
+        result = get_data_params(@urls[:get_bets_by_category_match], params)
+        result = format_bets(result)
+        session[:stage] = 5
       elsif session[:stage] == 5
         wifoot_pass
+        need_reply = false
       else
         result = "Please, select category to search"
-        reply_with :message, text: result
       end
     else
       result = "Sorry I can't recognize this phrase. Type help to see how I work"
-      reply_with :message, text: result
     end
-    puts session.as_json
+
+    puts "-----------#{session.as_json}--------------"
+
+    reply_with :message, text: result.to_s if need_reply
   end
 
   def wifoot_pass(*args)
@@ -81,108 +146,21 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     end
   end
 
-  def leagues(message = nil)
-    id = /\d/.match(message)
-    if id
-      session[:stage] = 2
-      result = get_data_params(@urls[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
-      result = format_matches(result)
-      reply_with :message, text: result
-    else
-      session[:stage] = 1
-      result = get_data_from_url(@urls[:leagues])
-      result = format_leagues_with_images(result)
-      reply_with :message, text: "Available leagues:\n"
-      result.each do |r|
-        reply_with :message, text: r[:text]
-        reply_with :sticker, sticker: File.open('app/assets/images/leagues/'+r[:image])
-      end
-    end
-  end
-
-  def matches(message)
-    if /current/.match(message)
-      result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 2})
-    elsif /future|upcoming|up coming/.match(message)
-      result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 1})
-    elsif /finished|finish|ended|past/.match(message)
-      result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
-    else
-      result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
-    end
-    result = format_matches(result)
-    session[:stage] = 2
-    reply_with :message, text: result
-  end
-
-  def match(message)
-    num = /\d/.match(message)[0].to_i
-    id = session[:data][num]
-    result = get_data_params(@urls[:get_match_by_id], {"id" => id})
-    result = format_match(result)
-    reply_with :message, text: result
-    bets_categories
-  end
-
-  def bets_categories
-    result = get_data_from_url(@urls[:categories])
-    result = format_categories(result)
-    session[:stage] = 4
-    reply_with :message, text: result
-  end
-
-  def stats(message)
-    club_name = find_club_name(message)
-    result = get_data_params(@urls[:get_club_info], {"name" => club_name})
-    result = format_team_with_image(result)
-    reply_with :message, text: result[:text]
-    if result[:image].present?
-      reply_with :sticker, sticker: File.open('app/assets/images/club/'+result[:image])
-    end
-  end
-
-  def scores(message)
-    club_name = find_club_name(message)
-    result = get_data_params(@urls[:get_matches_by_club], {"name" => club_name, "page_id" => 0, "curr_status" => 3})
-    result = format_club_scores(result)
-    session[:stage] = 2
-    reply_with :message, text: result
-  end
-
-  def players(message)
-    club_name = find_club_name(message)
-    club_id = get_data_params(@urls[:get_club_info], {"name" => club_name}).first["api_id"]
-    result = get_data_params(@urls[:get_players_by_club], {"id" => club_id})
-    result = format_players(result)
-    session[:stage] = 3
-    reply_with :message, text: result
-  end
-
-  def player(message)
-    num = /\d/.match(message)[0].to_i
-    id = session[:data][num]
-    result = get_data_params(@urls[:get_player_by_id], {"id" => id})
-    result = format_player_with_image(result)
-    reply_with :message, text: result[:text]
-    if result[:image].present?
-      File.open('app/assets/images/players/'+result[:image], 'wb') do |fo|
-        fo.write open("http://demo.wifoot.ht/image/players/"+result[:image]).read 
-      end
-      reply_with :sticker, sticker: File.open('app/assets/images/players/'+result[:image])
-    end
-  end
-
-  def bets(message)
-    num = /\d/.match(message)[0].to_i
-    id = session[:data][num]
-    params = {"id" => 0, "match_id" => session[:match_id], "category_id" => id}
-    result = get_data_params(@urls[:get_bets_by_category_match], params)
-    result = format_bets(result)
-    session[:stage] = 5
-    reply_with :message, text: result
-  end
-
-
+  # def leagues(id = nil)
+  #   if league_id
+  #     result = get_data_params(@urls[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
+  #     result = format_matches(result)
+  #   else
+  #     save_context :leagues
+  #     result = get_data_from_url(@urls[:leagues])
+  #     result = format_leagues_with_images(result)
+  #     reply_with :message, text: "Available leagues:\n"
+  #     result.each do |r|
+  #       reply_with :message, text: r[:text]
+  #       reply_with :sticker, sticker: File.open('app/assets/images/leagues/'+r[:image])
+  #     end
+  #   end
+  # end
 
   # def inline_query(query, offset)
   #   query = query.first(10) # it's just an example, don't use large queries.
