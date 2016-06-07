@@ -8,17 +8,20 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   use_session!
 
   def start(*)
-    session[:stage] = 1
-    result = get_data_from_url(@urls[:leagues])
-    result = format_leagues_with_images(result)
-    reply_with :message, text: "Welcome to WiFoot!\nAvailable leagues:\n"
-    result.each do |r|
-      reply_with :message, text: r[:text]
-      # File.open('app/assets/images/leagues/'+r[:image], 'wb') do |fo|
-      #   fo.write open("http://demo.wifoot.ht/image/league/"+r[:image]).read 
-      # end
-      reply_with :sticker, sticker: File.open('app/assets/images/leagues/'+r[:image]), width: 64, height: 64
-    end
+      session[:stage] = 1
+      #session[:league_id] = 1
+      result = get_data_from_url(@urls[:leagues])
+      result = format_leagues_with_images(result)
+      reply_with :message, text: "Welcome to WiFoot!\nAvailable leagues:\n"
+      result.each do |r|
+        reply_with :message, text: r[:text]
+        unless File.exist?('app/assets/images/leagues/'+r[:image])
+          File.open('app/assets/images/leagues/'+r[:image], 'wb') do |fo|
+            fo.write open("http://demo.wifoot.ht/image/league/"+r[:image]).read 
+          end
+        end
+        reply_with :sticker, sticker: File.open('app/assets/images/leagues/'+r[:image])
+      end
   end
 
   def help(*)
@@ -31,12 +34,16 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     case message
     when /hello|hi|hey|welcome|salutatuion|hey|greeting|yo|aloha|howdy|hiya|good day|good morning|salute/i
       result = 'Hi, How can I help you today?'
-      reply_with :message, text: result
+      reply_with :message, text: result, reply_markup: {
+        keyboard: [%w(leagues Matches Help)],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+        selective: true,
+      }
     when /leagues|league/i
       leagues
     when /categories|category/i
-      result = get_data_from_url(@urls[:categories])
-      result = format_categories(result)
+      bets_categories
     when /matches/i
       matches(message)
     when /bets|bet/i
@@ -82,12 +89,21 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def leagues(message = nil)
-    id = /\d/.match(message)
-    if id
+    num = /\d/.match(message)
+    if num
+      id = session[:data][num[0].to_i]
       session[:stage] = 2
+      # session[:league_id] = id
       result = get_data_params(@urls[:matches_by_league], {"id" => id, "page_id" => 0, "curr_status" => 3})
       result = format_matches(result)
       reply_with :message, text: result
+      keyboard_array = Array.new(session[:data].size) { |e| (e+1).to_s }
+      reply_with :message, text: 'Make a choice', reply_markup: {
+        keyboard: [%w(leagues Matches Help), keyboard_array],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+        selective: true,
+      }
     else
       session[:stage] = 1
       result = get_data_from_url(@urls[:leagues])
@@ -95,8 +111,20 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       reply_with :message, text: "Available leagues:\n"
       result.each do |r|
         reply_with :message, text: r[:text]
-        reply_with :sticker, sticker: File.open('app/assets/images/leagues/'+r[:image])
+        unless File.exist?('app/assets/images/leagues/'+r[:image])
+          File.open('app/assets/images/leagues/'+r[:image], 'wb') do |fo|
+            fo.write open("http://demo.wifoot.ht/image/league/"+r[:image]).read 
+          end
+        end
+        #reply_with :sticker, sticker: File.open('app/assets/images/leagues/'+r[:image])
       end
+      keyboard_array = Array.new(session[:data].size) { |e| (e+1).to_s }
+      reply_with :message, text: 'Make a choice', reply_markup: {
+        keyboard: [%w(leagues Matches Help), keyboard_array],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+        selective: true,
+      }
     end
   end
 
@@ -111,7 +139,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       result = get_data_params(@urls[:matches], {"page_id" => 0, "curr_status" => 3})
     end
     result = format_matches(result)
-    session[:stage] = 2
+    session[:stage] = 2 if session[:data].any?
     reply_with :message, text: result
   end
 
@@ -125,7 +153,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def bets_categories
-    result = get_data_from_url(@urls[:categories])
+    result = get_data_params(@urls[:categories])
     result = format_categories(result)
     session[:stage] = 4
     reply_with :message, text: result
@@ -133,7 +161,8 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def stats(message)
     club_name = find_club_name(message)
-    result = get_data_params(@urls[:get_club_info], {"name" => club_name})
+    result = get_data_params(@urls[:get_club_info_by_name], {"name" => club_name, league_id: 1})
+    #result = get_data_params(@urls[:get_club_info], {id: club_id, league_id: session[:league_id]})#{"name" => club_name})
     result = format_team_with_image(result)
     reply_with :message, text: result[:text]
     if result[:image].present?
@@ -151,8 +180,8 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def players(message)
     club_name = find_club_name(message)
-    club_id = get_data_params(@urls[:get_club_info], {"name" => club_name}).first["api_id"]
-    result = get_data_params(@urls[:get_players_by_club], {"id" => club_id})
+    club_id = get_data_params(@urls[:get_club_info_by_name], {"name" => club_name, league_id: 1}).first["api_id"]
+    result = get_data_params(@urls[:get_players_by_club], {"id" => club_id, league_id: 1, line_roaster: 1})
     result = format_players(result)
     session[:stage] = 3
     reply_with :message, text: result
@@ -161,8 +190,10 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   def player(message)
     num = /\d/.match(message)[0].to_i
     id = session[:data][num]
-    result = get_data_params(@urls[:get_player_by_id], {"id" => id})
+    result = get_data_params(@urls[:get_player_by_id], {id: id})
+    puts result
     result = format_player_with_image(result)
+
     reply_with :message, text: result[:text]
     if result[:image].present?
       File.open('app/assets/images/players/'+result[:image], 'wb') do |fo|
@@ -174,15 +205,13 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def bets(message)
     num = /\d/.match(message)[0].to_i
-    id = session[:data][num]
-    params = {"id" => 0, "match_id" => session[:match_id], "category_id" => id}
+    category_id = session[:data][num]
+    params = {"id" => 0, "match_id" => 373, "category_id" => 1}
     result = get_data_params(@urls[:get_bets_by_category_match], params)
     result = format_bets(result)
     session[:stage] = 5
     reply_with :message, text: result
   end
-
-
 
   # def inline_query(query, offset)
   #   query = query.first(10) # it's just an example, don't use large queries.
@@ -226,19 +255,20 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   #   reply_with :message, text: reply
   # end
 
-  # def keyboard(value = nil, *)
-  #   if value
-  #     reply_with :message, text: "You've selected: #{value}"
-  #   else
-  #     save_context :keyboard
-  #     reply_with :message, text: 'Select something with keyboard:', reply_markup: {
-  #       keyboard: [%w(Lorem Ipsum /cancel)],
-  #       resize_keyboard: true,
-  #       one_time_keyboard: true,
-  #       selective: true,
-  #     }
-  #   end
-  # end
+  def keyboard(value = nil, *)
+    if value
+      message(value)
+      reply_with :message, text: "You've selected: #{value}"
+    else
+      save_context :keyboard
+      reply_with :message, text: 'Select league with keyboard:', reply_markup: {
+        keyboard: [%w(Lorem Ipsum /cancel)],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+        selective: true,
+      }
+    end
+  end
 
   # def inline_keyboard
   #   reply_with :message, text: 'Check my inline keyboard:', reply_markup: {
@@ -246,6 +276,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   #       [
   #         {text: 'Answer with alert', callback_data: 'alert'},
   #         {text: 'Without alert', callback_data: 'no_alert'},
+  #         {text: 'Answer', callback_data: 'message'},
   #       ],
   #       [{text: 'Open gem repo', url: 'https://github.com/telegram-bot-rb/telegram-bot'}],
   #     ],

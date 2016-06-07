@@ -20,14 +20,15 @@ module ApiGetData
 
   def api_urls
   	@urls = {
-  		categories: API_URL+'getCategory.php',  #GET
+  		categories: API_URL+'getCategory.php',
   		leagues: API_URL+'getAllLeagues.php',   #GET
   		matches: API_URL+'getAllMatches.php', #POST
   		matches_by_league: API_URL+'getMatchesByLeague.php', #POST
   		get_available_bets: API_URL+'getAllAvailableBet.php', #GET
   		bets_by_category: API_URL+'getAvailableBetByCategory.php',
   		get_teams_by_league: API_URL+'getAllTeamByLeague.php',
-  		get_club_info: API_URL+'getClubInfoByName.php',
+  		get_club_info_by_name: API_URL+'getClubInfoByName.php',
+      get_club_info: API_URL+'getClubInfo.php',
       get_matches_by_club: API_URL+'getMatchesByClub.php',
       get_match_by_id: API_URL+'getMatchByApiID.php',
       get_players_by_club: API_URL+'getPlayersInfoByTeamId.php',
@@ -42,11 +43,17 @@ module ApiGetData
     return JSON.parse(res.body) if res.is_a?(Net::HTTPSuccess)
   end
 
-  def get_data_params(url, params)
-  	uri = URI.parse(url)
-  	http = Net::HTTP.new(uri.host, uri.port)
-  	response = http.post(uri.path, params.to_query)
-  	return JSON.parse(response.body)
+  def get_data_params(url, params={})
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    response = http.post(uri.path, params.to_query)
+    case response
+    when Net::HTTPOK
+      return JSON.parse(response.body)
+    when Net::HTTPClientError,
+         Net::HTTPInternalServerError
+      return 'error'
+    end
   end
 
   def find_club_name(text)
@@ -72,6 +79,7 @@ module ApiGetData
   end
 
   def format_categories(data)
+    puts data
     data_ids = {}
   	result = "Bet Categories\n"
   	# {"event_category_id":"1","event_name":"Win\/Lose\/Draw","event_rule_id":"0","event_name_creole":"Kale\/Pedu\/Match Nil","image":"1_win_lose_draw.png"}
@@ -132,23 +140,26 @@ module ApiGetData
   end
 
   def format_matches(data)
-  	result = ""
+  	result = ''
     data_ids = {}
   	if data.is_a?(Array)
 	  	data.each_with_index do |d, i|
-	  		time = Time.at(d["match_time"].to_f/1000).strftime("%m.%d.%Y at %I:%M%p")
-	  		result << "#{i+1})Match Time: #{time}\nHome:#{d["0"]["home"][0]["name"]} - Away:#{d["1"]["away"][0]["name"]}\nScores: #{d["home_score"]} : #{d["away_score"]}\n\n"
-        data_ids[i+1] = d["match_id"]
+        if d["0"]["home"].any? && d["1"]["away"].any?
+  	  		time = Time.at(d["match_time"].to_f/1000).strftime("%m.%d.%Y at %I:%M%p")
+  	  		result << "#{i+1})Match Time: #{time}\nHome:#{d["0"]["home"]["0"]["name"]} - Away:#{d["1"]["away"]["0"]["name"]}\nScores: #{d["home_score"]} : #{d["away_score"]}\n\n"
+          data_ids[i+1] = d["match_id"]
+        end
 	  	end
   	else
   		result =  "result is empty"
   	end
+    result =  "result is empty" if result.empty?
     session[:data] = data_ids
-   # puts data_ids
   	return result
   end
 
   def format_match(data)
+    puts data
     d = data.first
     session[:match_id] = d["match_id"]
     time = Time.at(d["match_time"].to_f/1000).strftime("%m.%d.%Y at %I:%M%p")
