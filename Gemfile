@@ -24,21 +24,11 @@ gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0', group: :doc
 
 gem 'telegram-bot', github: 'telegram-bot-rb/telegram-bot', ref: 'a52e7ff'
-# gem 'telegram-bot', path: '../telegram-bot'
 gem 'messenger-bot'
 gem 'facebook-messenger'
 
 gem 'puma'
 gem 'foreman'
-
-# Use ActiveModel has_secure_password
-# gem 'bcrypt', '~> 3.1.7'
-
-# Use Unicorn as the app server
-# gem 'unicorn'
-
-# Use Capistrano for deployment
-# gem 'capistrano-rails', group: :development
 
 gem 'jazz_hands', github: 'dhanushram/jazz_hands', ref: '9bcd0a5d', platforms: [:ruby]
 gem 'pry', '~> 0.10.3'
@@ -46,17 +36,12 @@ gem 'pry', '~> 0.10.3'
 gem 'rails_12factor', group: :production
 
 group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
 end
 
 group :development do
-  # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
-
-  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-
   gem 'rspec-rails'
   gem 'rspec-its'
   gem 'spring-commands-rspec'

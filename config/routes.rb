@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   #mount Messenger::Bot::Space => "/webhook"
   mount Facebook::Messenger::Server, at: 'bot'
 
+  # get "/index" => "telegram_bot#index", :format => "xml"
   get "/answer" => "telegram_bot#answer", :format => "xml"
 
 end

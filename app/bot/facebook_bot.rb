@@ -1,21 +1,21 @@
 require 'json'
 
-CLUB_NAMES = ["chelsea", "man city", "southampton", "west ham", "liverpool", "man united", "arsenal", "swansea", "tottenham", "stoke", "bournemouth", "aston villa", "everton", "west brom", "leicester", "crystal palace", "sunderland", "newcastle", "watford", "norwich", "bayern munich", "m'gladbach", "mainz", "hoffenheim", "wolfsburg", "leverkusen", "ingolstadt", "ein frankfurt", "schalke 04", "hannover", "fc koln", "augsburg", "hertha", "dortmund", "stuttgart", "hamburg", "darmstadt", "werder bremen", "juventus", "roma", "sampdoria", "milan", "udinese", "lazio", "napoli", "verona", "inter", "genoa", "fiorentina", "torino", "empoli", "atalanta", "carpi", "palermo", "bologna", "chievo", "sassuolo", "frosinone", "marseille", "paris sg", "bordeaux", "lyon", "st etienne", "nantes", "angers", "lille", "toulouse", "monaco", "montpellier", "nice", "rennes", "stade de reims", "lorient", "bastia", "gfco ajaccio", "caen", "guingamp", "troyes", "barcelona", "sevilla", "real madrid", "valencia", "ath madrid", "villarreal", "celta vigo", "malaga", "vallecano", "getafe", "espanol", "eibar", "betis", "granada", "la coruna", "sociedad", "ath bilbao", "las palmas", "levante", "sp gijon", "carpi"]
-API_URL = 'http://demo.wifoot.ht/api/web-services/'
-URLS = {
-      categories: API_URL+'getCategory.php',
-      leagues: API_URL+'getAllLeagues.php',
-      matches: API_URL+'getAllMatches.php',
-      matches_by_league: API_URL+'getMatchesByLeague.php', 
-      get_available_bets: API_URL+'getAllAvailableBet.php',
-      bets_by_category: API_URL+'getAvailableBetByCategory.php',
-      get_teams_by_league: API_URL+'getAllTeamByLeague.php',
-      get_club_info: API_URL+'getClubInfoByName.php',
-      get_matches_by_club: API_URL+'getMatchesByClub.php',
-      get_match_by_id: API_URL+'getMatchByApiID.php',
-      get_players_by_club: API_URL+'getPlayersInfoByTeamId.php',
-      get_player_by_id: API_URL+'getPlayerInfoById.php'
-    }
+# CLUB_NAMES = ["chelsea", "man city", "southampton", "west ham", "liverpool", "man united", "arsenal", "swansea", "tottenham", "stoke", "bournemouth", "aston villa", "everton", "west brom", "leicester", "crystal palace", "sunderland", "newcastle", "watford", "norwich", "bayern munich", "m'gladbach", "mainz", "hoffenheim", "wolfsburg", "leverkusen", "ingolstadt", "ein frankfurt", "schalke 04", "hannover", "fc koln", "augsburg", "hertha", "dortmund", "stuttgart", "hamburg", "darmstadt", "werder bremen", "juventus", "roma", "sampdoria", "milan", "udinese", "lazio", "napoli", "verona", "inter", "genoa", "fiorentina", "torino", "empoli", "atalanta", "carpi", "palermo", "bologna", "chievo", "sassuolo", "frosinone", "marseille", "paris sg", "bordeaux", "lyon", "st etienne", "nantes", "angers", "lille", "toulouse", "monaco", "montpellier", "nice", "rennes", "stade de reims", "lorient", "bastia", "gfco ajaccio", "caen", "guingamp", "troyes", "barcelona", "sevilla", "real madrid", "valencia", "ath madrid", "villarreal", "celta vigo", "malaga", "vallecano", "getafe", "espanol", "eibar", "betis", "granada", "la coruna", "sociedad", "ath bilbao", "las palmas", "levante", "sp gijon", "carpi"]
+# API_URL = 'http://demo.wifoot.ht/api/web-services/'
+# URLS = {
+#       categories: API_URL+'getCategory.php',
+#       leagues: API_URL+'getAllLeagues.php',
+#       matches: API_URL+'getAllMatches.php',
+#       matches_by_league: API_URL+'getMatchesByLeague.php', 
+#       get_available_bets: API_URL+'getAllAvailableBet.php',
+#       bets_by_category: API_URL+'getAvailableBetByCategory.php',
+#       get_teams_by_league: API_URL+'getAllTeamByLeague.php',
+#       get_club_info: API_URL+'getClubInfoByName.php',
+#       get_matches_by_club: API_URL+'getMatchesByClub.php',
+#       get_match_by_id: API_URL+'getMatchByApiID.php',
+#       get_players_by_club: API_URL+'getPlayersInfoByTeamId.php',
+#       get_player_by_id: API_URL+'getPlayerInfoById.php'
+#     }
 
 
 class WifootBot
