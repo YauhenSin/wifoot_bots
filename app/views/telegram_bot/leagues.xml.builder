@@ -2,18 +2,26 @@
 
 xml.instruct! :xml, :version => "1.0", :encoding=>"UTF-8"
 xml.page :version => "2.0" do
-	xml.div "Available leagues: "
-	
-	for league in @leagues
-	  	xml.div "#{league["id"]}) #{league["name"]}"
-		xml.attachment type: "photo", src: "http://demo.wifoot.ht/image/league/"+league["image"]
-	end
+  xml.div "Available leagues: "
 
-	xml.input name: 'my_input'
+  # @leagues.each_with_index {|league, i|
+  #   xml.div "#{i+1}) #{league["name"]}"
+    # xml.attachment type: "photo", src: "http://demo.wifoot.ht/image/league/"+league["image"]
+  # }
 
-	# xml.navigation id: "submit" do
-	# 	xml.link "help", pageId: "answer.xml"
-	# end
+  xml.navigation id: 'submit', attributes: 'telegram.inline: true' do
+    @leagues.each_with_index {|league, i|
+      xml.link league['name'], pageId: "answer.xml?my_input=#{@inputs[i+1]}"
+    }
+  end
 
-	# xml.input navigation: "submit", name: "keyboard_input"
+  xml.div do
+    xml.input name: 'my_input'
+  end
+
+  # xml.navigation id: "submit" do
+  #   xml.link "help", pageId: "answer.xml"
+  # end
+
+  # xml.input navigation: "submit", name: "keyboard_input"
 end

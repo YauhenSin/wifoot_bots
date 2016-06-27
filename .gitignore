@@ -18,4 +18,9 @@
 
 spec/examples.txt
 # config/secrets.yml
+/config/database.yml
 .env
+
+.idea/
+
+/vendor

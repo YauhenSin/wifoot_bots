@@ -14,8 +14,8 @@ URLS = {
 	get_club_info_by_name: API_URL+'getClubInfoByName.php',
 	get_club_info: API_URL+'getClubInfo.php',
 	get_matches_by_club: API_URL+'getMatchesByClub.php',
-	get_match_by_id: API_URL+'getMatchByApiID.php',
-	get_players_by_club: API_URL+'getPlayersInfoByTeamId.php',
+	get_match_by_id: API_URL+'getMatchByID.php',
+	get_players_by_team: API_URL+'getPlayersInfoByTeamId.php',
 	get_player_by_id: API_URL+'getPlayerInfoById.php',
 	get_bets_by_category_match: API_URL+'availableBetsByMatchCategoryAndPageId.php'
 }
@@ -54,45 +54,86 @@ class WifootBotAPI
   end
 
   def leagues
-  	result = get_data_from_url(URLS[:leagues])
-  	result.each_with_index {|r, i| @data[i+1] = r["id"].to_i}
-    return result
+    result = get_data_from_url(URLS[:leagues])
+    inputs = {}
+    result.each_with_index {|r, i| inputs[i+1] = r["id"].to_i}
+    save_inputs(inputs)
+    result
   end
 
- #  def matches
- #    if /current/.match(@message.downcase)
- #      result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => 1, "id" => 0, "curr_status" => 2})
- #    elsif /future|upcoming|up coming/.match(@message.downcase)
- #      result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => 1, "id" => 0, "curr_status" => 1})
- #    elsif /finished|finish|ended|past/.match(@message.downcase)
- #      result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => 1, "id" => 0, "curr_status" => 3})
- #    else
- #      result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => 1, "id" => 0, "curr_status" => 3})
- #    end
- #    if result.any? && result.is_a?(Array)
-	# 	result.each_with_index {|r, i| @data[i+1] = r["match_id"].to_i}
-	# end
- #  	return result
- #  end
+  def teams
+    num = /\d/.match(@message)[0]
+    save_league(get_inputs[num])
+    result = get_data_params(URLS[:get_teams_by_league], {id: get_league})
+    inputs = {}
+    result.each_with_index {|r, i| inputs[i+1] = r["api_id"].to_i}
+    save_inputs(inputs)
+    result
+  end
+
+  def players
+    num = /\d/.match(@message)[0]
+    result = get_data_params(URLS[:get_players_by_team], {league_id: get_league, id: get_inputs[num], line_roaster: 1})
+    inputs = {}
+    result.each_with_index {|r, i| inputs[i+1] = r["id"].to_i}
+    save_inputs(inputs)
+    result
+  end
+
+  def matches
+    if /current/.match(@message.downcase)
+      result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => 1, "id" => 0, "curr_status" => 2})
+    elsif /future|upcoming|up coming/.match(@message.downcase)
+      result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => 1, "id" => 0, "curr_status" => 1})
+    elsif /finished|finish|ended|past/.match(@message.downcase)
+      result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => 1, "id" => 0, "curr_status" => 3})
+    else
+      result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => 1, "id" => 0, "curr_status" => 3})
+    end
+    if result.any? && result.is_a?(Array)
+      result.each_with_index {|r, i| @data[i+1] = r["match_id"].to_i}
+    end
+    result
+  end
 
   def matches_by_league
-  	num = /\d/.match(@message)[0]
-    id = @data[num]
-	result = get_data_params(URLS[:matches_by_league_page_id], {"league_id" => id, "id" => 0, "curr_status" => 3})
-	if result.any? && result.is_a?(Array)
-		result.each_with_index {|r, i| @data[i+1] = r["match_id"].to_i}
-	end
-	return result
+    num = /\d/.match(@message)[0]
+    save_league(get_inputs[num])
+    result = get_data_params(URLS[:matches_by_league_page_id], {league_id: get_league, id: 0, curr_status: 3})
+    # if result.any? && result.is_a?(Array)
+      inputs = {}
+      result.each_with_index {|r, i| inputs[i+1] = r["id"].to_i}
+      save_inputs(inputs)
+    # end
+    result
   end
 
   def match
-  	num = /\d/.match(@message)[0]
-    id = @data[num]
-  	result = get_data_params(@urls[:get_match_by_id], {"id" => id})
+    num = /\d/.match(@message)[0]
+    save_match(get_inputs[num])
+    # result = get_data_params(URLS[:get_match_by_id], {id: get_match, league_id: get_league})
+    # puts result
   end
 
   def categories
-  	result = get_data_from_url(URLS[:categories])
+    result = get_data_from_url(URLS[:categories])
+    inputs = {}
+    result.each_with_index {|r, i| inputs[i+1] = r["event_category_id"].to_i}
+    save_inputs(inputs)
+    result
+  end
+
+  def bets
+    num = /\d/.match(@message)[0]
+    save_category(get_inputs[num])
+    result = get_data_params(
+        URLS[:get_bets_by_category_match],
+        {league_id: get_league, match_id: get_match, category_id: get_category, id: 0})
+    puts result
+    inputs = {}
+    result.each_with_index {|r, i| inputs[i+1] = r["id"].to_i}
+    save_inputs(inputs)
+    result
   end
 
   def stats
@@ -105,11 +146,11 @@ class WifootBotAPI
     result = get_data_params(URLS[:get_matches_by_club], {"name" => club_name, "page_id" => 0, "curr_status" => 3})
   end
 
-  def players
-    club_name = find_club_name(@message)
-    club_id = get_data_params(URLS[:get_club_info], {"name" => club_name}).first["api_id"]
-    result = get_data_params(URLS[:get_players_by_club], {"id" => club_id})
-  end
+  # def players
+  #   club_name = find_club_name(@message)
+  #   club_id = get_data_params(URLS[:get_club_info], {"name" => club_name}).first["api_id"]
+  #   result = get_data_params(URLS[:get_players_by_club], {"id" => club_id})
+  # end
 
   def number_selection
     if @stage == 1
@@ -148,7 +189,7 @@ class WifootBotAPI
   end
 
   def unknown
-    bot_deliver("Sorry I can't recognize this phrese. Type help to see how I work")
+    bot_deliver("Sorry I can't recognize this phrase. Type help to see how I work")
   end
  
 
@@ -235,4 +276,37 @@ class WifootBotAPI
     @data = data_ids
     return result, data
   end
+
+  def get_league
+    @data['league_id']
+  end
+
+  def save_league(league_id)
+    @data['league_id'] = league_id
+  end
+
+  def get_match
+    @data['match_id']
+  end
+
+  def save_match(match_id)
+    @data['match_id'] = match_id
+  end
+
+  def get_category
+    @data['category_id']
+  end
+
+  def save_category(category_id)
+    @data['category_id'] = category_id
+  end
+
+  def get_inputs
+    @data['inputs']
+  end
+
+  def save_inputs(inputs)
+    @data['inputs'] = inputs
+  end
+
 end

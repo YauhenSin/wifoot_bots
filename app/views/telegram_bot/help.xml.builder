@@ -13,5 +13,5 @@ xml.page :version => "2.0" do
 
 	xml.div do
   	  xml.input name: 'my_input'
-    end 
+    end
 end
